@@ -1,0 +1,7 @@
+version: "3"
+
+services:
+  nvim:
+    image: wmb1207/zig_awesome_vim:latest
+    volumes:
+      - ./:/app

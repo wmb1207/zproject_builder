@@ -1,0 +1,19 @@
+version: "3"
+
+services:
+  nvim:
+    image: wmb1207/python_awesome_vim:latest
+    volumes:
+      - ./:/app
+  database:
+    image: mysql:latest
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_USER: $DB_USERNAME
+      MYSQL_PASSWORD: $DB_PASSWORD
+      MYSQL_DATABASE: $DB_NAME
+    expose:
+      - 3306
+    ports:
+      - 3306:3306
