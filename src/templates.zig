@@ -84,3 +84,25 @@ pub const MAIN_PY =
     \\    main()
     \\
 ;
+
+pub const PACKAGE_JSON =
+    \\{{
+    \\  "name": "{s}",
+    \\  "version": "1.0.0",
+    \\  "description": "{s}",
+    \\  "main": "index.js",
+    \\  "scripts": {{
+    \\    "test": "echo \"Error: no test specified\" && exit 1"
+    \\  }},
+    \\  "author": "testing",
+    \\  "license": "ISC",
+    \\  "dependencies": {{
+    \\    "express": "^4.18.2",
+    \\    "typescript": "^5.0.4"
+    \\  }},
+    \\  "devDependencies": {{
+    \\    "@types/express": "^4.17.17"
+    \\  }}
+    \\}}
+    \\
+;

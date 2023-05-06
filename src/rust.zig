@@ -1,7 +1,9 @@
 const utils = @import("utils.zig");
-const fs = @import("std").fs;
+const std = @import("std");
+const fs = std.fs;
+const Tuple = std.meta.Tuple;
 
-fn ExecuteCargoInit() ![]u8 {
+fn ExecuteCargoInit() !Tuple(&.{ []u8, []u8 }) {
     return try utils.ExecuteCmd("cargo", "init");
 }
 

@@ -2,6 +2,8 @@ const std = @import("std");
 const templates = @import("templates.zig");
 const python = @import("python.zig");
 const rust = @import("rust.zig");
+const zig = @import("zig.zig");
+const typescript = @import("typescript.zig");
 const utils = @import("utils.zig");
 const structs = @import("structs.zig");
 
@@ -12,7 +14,6 @@ const mem = std.mem;
 const os = std.os;
 const childProcess = std.ChildProcess;
 const stdout = std.io.getStdOut;
-const stdin = std.io.getStdIn;
 
 fn createProject(project: structs.Project) !void {
     const cwd = fs.cwd();
@@ -33,86 +34,20 @@ fn createProject(project: structs.Project) !void {
             try rust.createRustProject(dir);
             try utils.createDockerCompose(dir, "rust_", project);
         },
-        .zig => std.log.debug("oeuoeuoeu", .{}),
+        .zig => {
+            try zig.createZigProject(dir);
+            try utils.createDockerCompose(dir, "zig_", project);
+        },
+        .js => {
+            _ = try stdout().write("No no no... you're wrong... lets use TS");
+            try typescript.createTypescriptProject(dir, project);
+            try utils.createDockerCompose(dir, "ts_", project);
+        },
+        .ts => {
+            try typescript.createTypescriptProject(dir, project);
+            try utils.createDockerCompose(dir, "ts_", project);
+        },
     }
-}
-
-const ConfigInputError = error{
-    InvalidInput,
-};
-
-const OptionalResponse = union {
-    language: structs.Languages,
-    database: structs.Databases,
-    invalid_input: ConfigInputError,
-};
-
-fn MapCharToLanguage(value: []u8) OptionalResponse {
-    if (mem.eql(u8, value, "p")) return OptionalResponse{ .language = .python };
-    if (mem.eql(u8, value, "r")) return OptionalResponse{ .language = .rust };
-    if (mem.eql(u8, value, "z")) return OptionalResponse{ .language = .zig };
-    return OptionalResponse{ .invalid_input = ConfigInputError.InvalidInput };
-}
-
-fn MapCharToDatabase(value: []u8) OptionalResponse {
-    if (mem.eql(u8, value, "m")) return OptionalResponse{ .database = .mysql };
-    if (mem.eql(u8, value, "M")) return OptionalResponse{ .database = .mariadb };
-    if (mem.eql(u8, value, "p")) return OptionalResponse{ .database = .postgresql };
-    return OptionalResponse{ .invalid_input = ConfigInputError.InvalidInput };
-}
-
-fn SelectDatabase() !OptionalResponse {
-    const select_message =
-        \\ Choose a database: 
-        \\      mysql(m) 
-        \\      mariadb(M)
-        \\      postgresql(p)
-        \\
-    ;
-    return OptionalQuestion(select_message, MapCharToDatabase);
-}
-
-fn SelectLanguage() !OptionalResponse {
-    const select_message =
-        \\ Choose a language: 
-        \\      python(p) 
-        \\      rust(r)
-        \\      zig(z)
-        \\
-    ;
-
-    return OptionalQuestion(select_message, MapCharToLanguage);
-}
-
-fn OptionalQuestion(question: []const u8, handler: *const fn (value: []u8) OptionalResponse) !OptionalResponse {
-    _ = try stdout().write(question);
-    const input_reader = stdin().reader();
-    var buffer: [2]u8 = undefined; // REMEMBER this needs to be 2 to be able to handle the new_line char '\n'.
-
-    if (try input_reader.readUntilDelimiterOrEof(buffer[0..], '\n')) |user_input| {
-        return handler(user_input);
-    }
-    @panic("ERROR INVALID OPTION");
-}
-
-fn binary_question(question: []const u8) !bool {
-    _ = try stdout().write(question);
-    const input_reader = stdin().reader();
-    var buffer: [2]u8 = undefined; // REMEMBER this needs to be 2 to be able to handle the new_line char '\n'.
-    if (try input_reader.readUntilDelimiterOrEof(buffer[0..], '\n')) |user_input| {
-        if (mem.eql(u8, user_input, "n")) return false;
-    }
-    return true;
-}
-
-fn ShouldIncludeNvimContainer() !bool {
-    const question = "Include a Neovim container ready to code? (Y/n):";
-    return binary_question(question);
-}
-
-fn ShouldIncludeDatabaseContainer() !bool {
-    const question = "Include a SQL database container? (Y/n):";
-    return binary_question(question);
 }
 
 pub fn main() !void {
@@ -129,12 +64,12 @@ pub fn main() !void {
 
     var project = structs.EmptyProject();
     project.name = project_name;
-    const selected_language_response = try SelectLanguage();
+    const selected_language_response = try utils.SelectLanguage();
     project.language = selected_language_response.language;
-    project.include_nvim_container = try ShouldIncludeNvimContainer();
-    project.include_database_container = try ShouldIncludeDatabaseContainer();
+    project.include_nvim_container = try utils.ShouldIncludeNvimContainer();
+    project.include_database_container = try utils.ShouldIncludeDatabaseContainer();
     if (project.include_database_container) {
-        const selected_database_response = try SelectDatabase();
+        const selected_database_response = try utils.SelectDatabase();
         var database = structs.Database{
             .version = "latest",
             .port = "3306",

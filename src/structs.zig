@@ -1,5 +1,8 @@
+const std = @import("std");
+const Tuple = std.meta.Tuple;
+
 pub const Databases = enum { mysql, postgresql, mariadb };
-pub const Languages = enum { python, zig, rust };
+pub const Languages = enum { python, zig, rust, js, ts };
 
 pub const Database = struct {
     version: []const u8,
@@ -40,3 +43,5 @@ pub fn EmptyProject() Project {
         .language = undefined,
     };
 }
+
+pub const CmdResult = Tuple(&.{ []u8, []u8 });
