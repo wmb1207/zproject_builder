@@ -1,9 +1,8 @@
 name: "ci builder"
 
 on: 
-  push:
-    branches:
-      - ci
+  paths:
+    - 'nvim_containers'
 
 jobs:
   build_base_nvim:
