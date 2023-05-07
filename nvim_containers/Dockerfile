@@ -1,5 +1,6 @@
 FROM fedora:latest
 
+
 RUN dnf update -y && \
     dnf install -y ninja-build git cmake gcc g++ make unzip gettext curl tar nodejs fzf python3-pip ripgrep &&\
     git clone https://github.com/neovim/neovim.git
