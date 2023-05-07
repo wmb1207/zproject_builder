@@ -1,8 +1,9 @@
 name: "ci builder"
 
 on: 
-  paths:
-    - 'nvim_containers'
+  push:
+    paths:
+      - '**Dockerfile'
 
 jobs:
   build_base_nvim:
